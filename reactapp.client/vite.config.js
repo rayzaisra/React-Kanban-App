@@ -1,7 +1,8 @@
-import { fileURLToPath, URL } from 'node:url';
+﻿import { fileURLToPath, URL } from 'node:url';
 
 import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
@@ -39,23 +40,31 @@ const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_H
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [plugin()],
+    plugins: [
+        plugin(),
+        tailwindcss() // ← ADD THIS: Tailwind v4 plugin
+    ],
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
     },
     server: {
-        proxy: {
-            '^/weatherforecast': {
-                target,
-                secure: false
-            }
-        },
+        //proxy: {
+        //    '^/weatherforecast': {
+        //        target,
+        //        secure: false
+        //    },
+        //    // Add API proxy if needed
+        //    '^/api': {
+        //        target: 'https://localhost:7011',  // ← Must match,
+        //        secure: false
+        //    }
+        //},
         port: parseInt(env.DEV_SERVER_PORT || '62062'),
         https: {
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),
         }
     }
-})
+});
