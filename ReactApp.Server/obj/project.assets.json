@@ -3388,7 +3388,7 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\202101006\\.nuget\\packages\\": {},
+    "D:\\--NITIP\\NetCore\\ReactApp\\.nuget\\packages": {},
     "D:\\Program\\Microsoft\\VisualStudio\\Shared\\NuGetPackages": {}
   },
   "project": {
@@ -3397,13 +3397,14 @@
       "projectUniqueName": "D:\\--NITIP\\NetCore\\ReactApp\\ReactApp.Server\\ReactApp.Server.csproj",
       "projectName": "ReactApp.Server",
       "projectPath": "D:\\--NITIP\\NetCore\\ReactApp\\ReactApp.Server\\ReactApp.Server.csproj",
-      "packagesPath": "C:\\Users\\202101006\\.nuget\\packages\\",
+      "packagesPath": "D:\\--NITIP\\NetCore\\ReactApp\\.nuget\\packages",
       "outputPath": "D:\\--NITIP\\NetCore\\ReactApp\\ReactApp.Server\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Program\\Microsoft\\VisualStudio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
+        "D:\\--NITIP\\NetCore\\ReactApp\\NuGet.Config",
         "C:\\Users\\202101006\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 19.2.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",

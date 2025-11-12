@@ -1,5 +1,4 @@
 D:\--NITIP\NetCore\ReactApp\ReactApp.Server\bin\Debug\net8.0\spa.proxy.json
-D:\--NITIP\NetCore\ReactApp\ReactApp.Server\bin\Debug\net8.0\nuget.config
 D:\--NITIP\NetCore\ReactApp\ReactApp.Server\bin\Debug\net8.0\appsettings.Development.json
 D:\--NITIP\NetCore\ReactApp\ReactApp.Server\bin\Debug\net8.0\appsettings.json
 D:\--NITIP\NetCore\ReactApp\ReactApp.Server\bin\Debug\net8.0\ReactApp.Server.staticwebassets.endpoints.json
