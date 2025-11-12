@@ -132,7 +132,7 @@
               "RelativeDocumentMoniker": "ReactApp.Server\\Controllers\\TasksController.cs",
               "ToolTip": "D:\\--NITIP\\NetCore\\ReactApp\\ReactApp.Server\\Controllers\\TasksController.cs",
               "RelativeToolTip": "ReactApp.Server\\Controllers\\TasksController.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAgwDwAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAACcAAAAAAAAAAAAgwDMAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-11T07:52:00.252Z",
               "EditorCaption": ""
@@ -147,8 +147,7 @@
               "RelativeToolTip": "ReactApp.Server\\Services\\Interfaces\\ITaskService.cs",
               "ViewState": "AgIAAAUAAAAAAAAAAAAswAkAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:40:53.601Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:40:53.601Z"
             },
             {
               "$type": "Document",
@@ -160,8 +159,7 @@
               "RelativeToolTip": "reactapp.client\\src\\services\\api.js",
               "ViewState": "AgIAABEAAAAAAAAAAAAkwDYAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-11-11T09:15:25.845Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:15:25.845Z"
             },
             {
               "$type": "Document",
@@ -173,8 +171,7 @@
               "RelativeToolTip": "reactapp.client\\src\\components\\Board.jsx",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEQAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-11-11T09:10:54.534Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:10:54.534Z"
             },
             {
               "$type": "Document",
@@ -186,8 +183,7 @@
               "RelativeToolTip": "reactapp.client\\src\\components\\TaskCard.jsx",
               "ViewState": "AgIAAEYAAAAAAAAAAAAgwFQAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-11-11T09:13:36.505Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:13:36.505Z"
             },
             {
               "$type": "Document",
@@ -199,8 +195,7 @@
               "RelativeToolTip": "ReactApp.Server\\Dto\\TaskDto.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAAYAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:38:27.556Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:38:27.556Z"
             },
             {
               "$type": "Document",
@@ -212,8 +207,7 @@
               "RelativeToolTip": "ReactApp.Server\\Entities\\AppDbContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAABBAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:48:56.218Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:48:56.218Z"
             },
             {
               "$type": "Document",
@@ -225,8 +219,7 @@
               "RelativeToolTip": "ReactApp.Server\\Entities\\Task.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAAAABAAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:35:23.376Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:35:23.376Z"
             },
             {
               "$type": "Document",
@@ -238,8 +231,7 @@
               "RelativeToolTip": "ReactApp.Server\\Services\\TaskService.cs",
               "ViewState": "AgIAADMAAAAAAAAAAAArwC8AAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:42:34.634Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:42:34.634Z"
             },
             {
               "$type": "Document",
@@ -251,8 +243,7 @@
               "RelativeToolTip": "ReactApp.Server\\Dto\\UpdateTaskDto.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAuwAoAAABJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:39:20.501Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:39:20.501Z"
             },
             {
               "$type": "Document",
@@ -264,8 +255,7 @@
               "RelativeToolTip": "reactapp.client\\src\\components\\Column.jsx",
               "ViewState": "AgIAAAQAAAAAAAAAAAAkwBIAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-11-11T09:12:18.208Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:12:18.208Z"
             },
             {
               "$type": "Document",
@@ -277,8 +267,7 @@
               "RelativeToolTip": "ReactApp.Server\\Program.cs",
               "ViewState": "AgIAABAAAAAAAAAAAAAUwCEAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:50:37.001Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:50:37.001Z"
             },
             {
               "$type": "Document",
@@ -290,8 +279,7 @@
               "RelativeToolTip": "ReactApp.Server\\Repositories\\TaskRepository.cs",
               "ViewState": "AgIAABoAAAAAAAAAAAAIwCIAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:49:33.653Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:49:33.653Z"
             },
             {
               "$type": "Document",
@@ -303,8 +291,7 @@
               "RelativeToolTip": "ReactApp.Server\\Entities\\Status.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAuwAIAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:35:53.096Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:35:53.096Z"
             },
             {
               "$type": "Document",
@@ -316,8 +303,7 @@
               "RelativeToolTip": "ReactApp.Server\\Repositories\\Intefaces\\ITaskRepository.cs",
               "ViewState": "AgIAAAMAAAAAAAAAAAAawAcAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T07:37:23.802Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T07:37:23.802Z"
             },
             {
               "$type": "Document",
@@ -329,8 +315,7 @@
               "RelativeToolTip": "reactapp.client\\src\\App.jsx",
               "ViewState": "AgIAAC8AAAAAAAAAAAAAwDEAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-11-11T09:10:19.431Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:10:19.431Z"
             },
             {
               "$type": "Document",
@@ -342,8 +327,7 @@
               "RelativeToolTip": "reactapp.client\\src\\components\\TaskForm.jsx",
               "ViewState": "AgIAAG8AAAAAAAAAAAAgwH0AAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003663|",
-              "WhenOpened": "2025-11-11T09:14:22.01Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:14:22.01Z"
             },
             {
               "$type": "Document",
@@ -355,8 +339,7 @@
               "RelativeToolTip": "reactapp.client\\vite.config.js",
               "ViewState": "AgIAACMAAAAAAAAAAAArwCUAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-11-12T02:55:45.795Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-12T02:55:45.795Z"
             },
             {
               "$type": "Document",
@@ -368,8 +351,7 @@
               "RelativeToolTip": "reactapp.client\\src\\App.css",
               "ViewState": "AgIAACYAAAAAAAAAAAAIwDgAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-11-11T09:16:16.327Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:16:16.327Z"
             },
             {
               "$type": "Document",
@@ -381,8 +363,7 @@
               "RelativeToolTip": "reactapp.client\\src\\index.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-11-12T02:23:14.919Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-12T02:23:14.919Z"
             },
             {
               "$type": "Document",
@@ -394,8 +375,7 @@
               "RelativeToolTip": "reactapp.client\\node_modules\\axios\\lib\\core\\Axios.js",
               "ViewState": "AgIAADUAAAAAAAAAAAAQwDwAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2025-11-11T09:16:45.176Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-11T09:16:45.176Z"
             },
             {
               "$type": "Document",
@@ -419,8 +399,7 @@
               "RelativeToolTip": "reactapp.client\\package.json",
               "ViewState": "AgIAABIAAAAAAAAAAAAiwBsAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-12T02:26:06.553Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-12T02:26:06.553Z"
             },
             {
               "$type": "Document",
