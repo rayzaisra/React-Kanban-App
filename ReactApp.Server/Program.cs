@@ -20,7 +20,8 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         });
 });
-
+var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -29,19 +30,9 @@ builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsqlOptions =>
-        {
-            npgsqlOptions.SetPostgresVersion(new Version(14, 0)); // optional
-        });
-});
+    options.UseNpgsql(connectionString));
 
-// Force Npgsql to prefer IPv4
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-AppContext.SetSwitch("System.Net.Sockets.DisableIPv6", true);
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 

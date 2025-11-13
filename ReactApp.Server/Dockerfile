@@ -4,6 +4,7 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 # Railway will inject its own dynamic PORT
+ENV DOTNET_SYSTEM_NET_DISABLEIPV6 true
 EXPOSE 8080
 
 # ───────────────────────────────────────────────
