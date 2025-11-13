@@ -30,7 +30,10 @@ builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.CommandTimeout(120); // 120 seconds
+    }));
 
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
