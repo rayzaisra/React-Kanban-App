@@ -28,17 +28,33 @@ namespace ReactApp.Server.Services
 
         public async Task<TaskDto> CreateAsync(CreateTaskDto dto)
         {
+            var requestDate = DateTime.Now;
+            var dueDate = DateTime.Now;
+            if (!string.IsNullOrEmpty(dto.RequestDate))
+            {
+                requestDate = DateTime.Parse(dto.RequestDate);  // Kind=Unspecified
+            }
+
+            if (!string.IsNullOrEmpty(dto.DueDate))
+            {
+                dueDate = DateTime.Parse(dto.DueDate);
+            }
+
+
             var task = new Entities.Task
             {
                 Id = Guid.NewGuid(),
                 Title = dto.Title,
                 Description = dto.Description,
                 RequestedBy = dto.RequestedBy,
-                RequestDate = dto.RequestDate,
-                DueDate = dto.DueDate,
+                // Strip Kind for DB compatibility (keeps value as-is)
+                RequestDate = requestDate,
+
+                DueDate = dueDate,
                 Status = Status.ToDo,
                 IsCompleted = false,
-                CreatedAt = DateTime.UtcNow
+                // Fix for UtcNow: Strip UTC flag (value remains UTC time, but DB sees it as local/unspecified)
+                CreatedAt = DateTime.Now
             };
 
             await _repository.AddAsync(task);

@@ -5,7 +5,7 @@
         public string Title { get; set; }
         public string Description { get; set; }
         public string RequestedBy { get; set; }
-        public DateTime RequestDate { get; set; }
-        public DateTime? DueDate { get; set; }
+        public string RequestDate { get; set; }
+        public string? DueDate { get; set; }
     }
 }
