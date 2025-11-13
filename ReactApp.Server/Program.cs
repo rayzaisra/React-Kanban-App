@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 using ReactApp.Server.Entities;
 using ReactApp.Server.Repositories;
@@ -40,12 +40,12 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 // ADD THIS LINE
@@ -53,6 +53,9 @@ app.UseCors("AllowAll");
 app.UseAuthorization();
 
 app.MapControllers();
+// ✅ If you serve React frontend from wwwroot
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapFallbackToFile("/index.html");
 
