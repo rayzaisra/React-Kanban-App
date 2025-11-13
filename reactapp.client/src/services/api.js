@@ -1,6 +1,6 @@
 ﻿import axios from 'axios';
 
-const API_URL = 'https://localhost:7011/api/tasks'; // Update to your API URL (e.g., after deploying or local)
+const API_URL = `${import.meta.env.VITE_API_BASE_URL}/tasks`; // Update to your API URL (e.g., after deploying or local)
 
 // MAP .NET enum (0,1,2) → React strings
 const statusMap = {
