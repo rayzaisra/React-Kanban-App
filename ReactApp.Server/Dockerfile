@@ -1,34 +1,45 @@
-﻿# ============================================
-# 1️⃣ BUILD STAGE
-# ============================================
+﻿# ───────────────────────────────────────────────
+#  Base image for runtime
+# ───────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 443
+
+# ───────────────────────────────────────────────
+#  Build stage
+# ───────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project file and restore dependencies
-COPY ReactApp.Server.csproj ./
-RUN dotnet restore --disable-parallel --ignore-failed-sources
+# Copy the csproj and restore dependencies
+COPY ["ReactApp.Server.csproj", "./"]
+RUN dotnet restore "ReactApp.Server.csproj" --disable-parallel --ignore-failed-sources
 
-# Copy the rest of the code
+# Copy all source code
 COPY . .
 
-# Build and publish to /app/out
-RUN dotnet publish -c Release -o /app/out
+# Build the app
+RUN dotnet build "ReactApp.Server.csproj" -c Release -o /app/build
 
-# ============================================
-# 2️⃣ RUNTIME STAGE
-# ============================================
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# ───────────────────────────────────────────────
+#  Publish stage
+# ───────────────────────────────────────────────
+FROM build AS publish
+RUN dotnet publish "ReactApp.Server.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# ───────────────────────────────────────────────
+#  Final runtime stage
+# ───────────────────────────────────────────────
+FROM base AS final
 WORKDIR /app
 
-# Copy build output
-COPY --from=build /app/out .
+# Copy published output
+COPY --from=publish /app/publish .
 
-# Set environment variables
+# Environment config (Railway uses PORT)
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Expose port
-EXPOSE 8080
-
-# Run the application
+# Start the app
 ENTRYPOINT ["dotnet", "ReactApp.Server.dll"]
