@@ -53,9 +53,7 @@ app.UseCors("AllowAll");
 app.UseAuthorization();
 
 app.MapControllers();
-// ✅ If you serve React frontend from wwwroot
-app.UseDefaultFiles();
-app.UseStaticFiles();
+
 
 app.MapFallbackToFile("/index.html");
 
