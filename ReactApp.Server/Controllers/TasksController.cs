@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 using ReactApp.Server.Dto;
 using ReactApp.Server.Services.Interfaces;
@@ -21,6 +22,28 @@ namespace ReactApp.Server.Controllers
         {
             var tasks = await _service.GetAllAsync();
             return Ok(tasks);
+        }
+
+        [HttpGet("paginated")]
+        public async Task<ActionResult<PaginatedTasksResponse>> GetPaginated(
+     [FromQuery] int page = 1,
+     [FromQuery] int pageSize = 10)
+        {
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var result = await _service.GetPaginatedWithCountAsync(page, pageSize);
+
+            var hasMore = (page * pageSize) < result.TotalCount;
+
+            return Ok(new PaginatedTasksResponse
+            {
+                Tasks = result.Tasks,
+                HasMore = hasMore,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalCount = result.TotalCount
+            });
         }
 
         [HttpGet("{id}")]

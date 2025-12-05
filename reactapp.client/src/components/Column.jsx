@@ -1,16 +1,35 @@
-﻿import TaskCard from './TaskCard';  // ← ADD THIS LINE
+﻿// src/components/Column.jsx
+import TaskCard from './TaskCard';
 
-const Column = ({ status, tasks, fetchTasks }) => {
-
-    const title = status === 'ToDo' ? 'To Do' : status === 'InProgress' ? 'In Progress' : 'Done';
+const Column = ({ status, tasks }) => {
+    const title = status === 'ToDo'
+        ? 'To Do'
+        : status === 'InProgress'
+            ? 'In Progress'
+            : 'Done';
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-            <h2 className="font-semibold text-lg mb-3 text-indigo-600 dark:text-indigo-400">{title}</h2>
-            <div className="space-y-3">
-                {tasks.map(task => (
-                    <TaskCard key={task.id} task={task} fetchTasks={fetchTasks} />
-                ))}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-5 min-h-[600px] flex flex-col">
+            <h2 className="font-semibold text-lg mb-4 text-indigo-600 dark:text-indigo-400">
+                {title}
+                <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                    ({tasks.length})
+                </span>
+            </h2>
+
+            <div className="space-y-3 flex-1 overflow-y-auto">
+                {tasks.length === 0 ? (
+                    <p className="text-center text-gray-400 dark:text-gray-500 text-sm py-8">
+                        No tasks here
+                    </p>
+                ) : (
+                    tasks.map(task => (
+                        <TaskCard
+                            key={task.id}
+                            task={task}
+                        />
+                    ))
+                )}
             </div>
         </div>
     );

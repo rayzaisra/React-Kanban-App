@@ -15,7 +15,7 @@ namespace ReactApp.Server.Repositories
         }
         public async Task<IEnumerable<Entities.Task>> GetAllAsync()
         {
-            return await _context.Tasks.ToListAsync();
+            return await _context.Tasks.OrderByDescending(x=>x.DueDate).ToListAsync();
         }
 
         public async Task<Entities.Task> GetByIdAsync(Guid id)
@@ -44,5 +44,10 @@ namespace ReactApp.Server.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public IQueryable<Entities.Task> GetQueryable()
+        {
+            return _context.Tasks.AsNoTracking(); // Very important for performance!
+        }
+
     }
 }

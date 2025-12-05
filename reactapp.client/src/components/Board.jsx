@@ -1,32 +1,48 @@
-﻿// src/components/Board.jsx
-import { useDrop } from 'react-dnd';
+﻿import { useDrop } from 'react-dnd';
 import Column from './Column';
 import { updateTask } from '../services/api';
+import { useQueryClient } from '@tanstack/react-query';
 
 const columns = ['ToDo', 'InProgress', 'Done'];
 
-const Board = ({ tasks, setTasks, fetchTasks }) => {
+const Board = ({ tasks }) => {
+    const queryClient = useQueryClient();
+
     const handleDrop = async (item, newStatus) => {
         const taskId = item?.id;
         if (!taskId) return;
 
-        const task = tasks.find(t => t.id === taskId);
-        if (!task || task.status === newStatus) return;
+        const oldTask = tasks.find(t => t.id === taskId);
+        if (!oldTask || oldTask.status === newStatus) return;
 
         const updatedTask = {
-            ...task,
+            ...oldTask,
             status: newStatus,
-            isCompleted: newStatus === 'Done'  // ← CRITICAL: Set isCompleted
+            isCompleted: newStatus === 'Done'
         };
 
-        // Optimistic UI update
-        setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
+        // 1. Optimistically update UI instantly
+        queryClient.setQueryData(['tasks'], (oldData) => {
+            if (!oldData) return oldData;
 
+            const newPages = oldData.pages.map(page => ({
+                ...page,
+                tasks: page.tasks.map(t =>
+                    t.id === taskId ? updatedTask : t
+                )
+            }));
+
+            return { ...oldData, pages: newPages };
+        });
+
+        // 2. Update backend (fire and forget)
         try {
             await updateTask(taskId, updatedTask);
+            // Success → already updated optimistically
         } catch (error) {
-            console.error('Update failed:', error);
-            fetchTasks(); // Revert on error
+            console.error('Failed to update task:', error);
+            // Revert on error
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
         }
     };
 
@@ -34,21 +50,21 @@ const Board = ({ tasks, setTasks, fetchTasks }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {columns.map(col => (
                 <DropZone key={col} status={col} onDrop={handleDrop}>
-                    <Column status={col} tasks={tasks.filter(t => t.status === col)} fetchTasks={fetchTasks} />
+                    <Column
+                        status={col}
+                        tasks={tasks.filter(t => t.status === col)}
+                    />
                 </DropZone>
             ))}
         </div>
     );
 };
 
-// CRITICAL: DropZone must wrap the entire column
+// DropZone stays the same
 const DropZone = ({ status, onDrop, children }) => {
     const [{ isOver }, drop] = useDrop(() => ({
         accept: 'task',
-        drop: (item) => {
-            console.log(`[DROP] Task ${item.id} → ${status}`); // ← DEBUG
-            onDrop(item, status);
-        },
+        drop: (item) => onDrop(item, status),
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
         }),
@@ -57,9 +73,9 @@ const DropZone = ({ status, onDrop, children }) => {
     return (
         <div
             ref={drop}
-            className={`min-h-[500px] p-3 rounded-lg transition-all
-        ${isOver ? 'bg-blue-100 dark:bg-blue-900/40 ring-2 ring-blue-500' : ''}
-      `}
+            className={`min-h-[600px] p-3 rounded-lg transition-all
+                ${isOver ? 'bg-blue-100 dark:bg-blue-900/30 ring-4 ring-blue-500 ring-opacity-50' : ''}
+            `}
         >
             {children}
         </div>

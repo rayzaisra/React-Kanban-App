@@ -42,6 +42,25 @@ export const getAllTasks = async () => {
    
 };
 
+export const getTasksPaginated = async ({ page = 1, pageSize = 10 }) => {
+    try {
+        const response = await axios.get(`${API_URL}/paginated`, {
+            params: { page, pageSize }
+        });
+        console.log(response.data);
+        return {
+            tasks: response.data.tasks.map(mapTaskFromApi), // ← CRITICAL FIX: Map statuses
+            hasMore: response.data.hasMore,
+            currentPage: response.data.currentPage,
+            pageSize: response.data.pageSize,
+            totalCount: response.data.totalCount
+        };
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
+};
+
 export const getTaskById = async id => {
     const response = await axios.get(`${API_URL}/${id}`);
     return mapTaskFromApi(response.data);

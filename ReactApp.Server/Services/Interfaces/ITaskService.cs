@@ -9,5 +9,6 @@ namespace ReactApp.Server.Services.Interfaces
         Task<TaskDto> CreateAsync(CreateTaskDto dto);
         Task UpdateAsync(Guid id, UpdateTaskDto dto);
         Task DeleteAsync(Guid id);
+        Task<PaginatedTasksResultDto> GetPaginatedWithCountAsync(int page, int pageSize);
     }
 }

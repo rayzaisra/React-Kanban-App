@@ -7,5 +7,6 @@
         Task AddAsync(ReactApp.Server.Entities.Task task);
         Task UpdateAsync(ReactApp.Server.Entities.Task task);
         Task DeleteAsync(Guid id);
+        IQueryable<Entities.Task> GetQueryable();
     }
 }

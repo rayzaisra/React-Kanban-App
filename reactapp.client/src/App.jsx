@@ -4,70 +4,118 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import TaskForm from './components/TaskForm';
 import Board from './components/Board';
-import { getAllTasks } from './services/api';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { getTasksPaginated } from './services/api';
 
 function App() {
-    const [tasks, setTasks] = useState([]);
-    const [showForm, setShowForm] = useState(false);  // ← This controls modal
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
+    const [showForm, setShowForm] = useState(false);
 
-    const fetchTasks = async () => {
-        setLoading(true);
-        try {
-            const data = await getAllTasks();
-            setTasks(data);
-        } catch (error) {
-            console.error('Failed to load tasks:', error);
-            setTasks([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        isError,
+        // refetch is no longer needed → we use queryClient.invalidateQueries instead
+    } = useInfiniteQuery({
+        queryKey: ['tasks'],
+        queryFn: ({ pageParam = 1 }) => getTasksPaginated({ page: pageParam, pageSize: 10 }),
+        getNextPageParam: (lastPage) => {
+            return lastPage.hasMore ? (lastPage.currentPage || 1) + 1 : undefined;
+        },
+        select: (data) => ({
+            tasks: data.pages.flatMap(page => page.tasks || []),
+            hasMore: data.pages[data.pages.length - 1]?.hasMore ?? false
+        }),
+        staleTime: 30_000,        // 30 seconds
+        gcTime: 5 * 60_000,       // 5 minutes (new name for cacheTime in RQ v5)
+    });
 
+    const tasks = data?.tasks || [];
+
+    // Infinite scroll
     useEffect(() => {
-        fetchTasks();
-    }, []);
+        const onScroll = () => {
+            if (
+                window.innerHeight + document.documentElement.scrollTop + 800 >=
+                document.documentElement.offsetHeight
+            ) {
+                if (hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
+                }
+            }
+        };
+
+        window.addEventListener('scroll', onScroll);
+        return () => window.removeEventListener('scroll', onScroll);
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+    // This is the only function we need to pass down
+    const refreshTasks = () => {
+        queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    };
 
     return (
         <DndProvider backend={HTML5Backend}>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
                 {/* HEADER */}
-                <header className="border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center">
+                <header className="border-b border-gray-200 dark:border-gray-700 p-4 flex justify-between items-center sticky top-0 bg-inherit backdrop-blur-sm z-50">
                     <h1 className="text-2xl font-bold">Kanban Board</h1>
                     <button
-                        onClick={() => {
-                            setShowForm(true);                // ← This triggers modal
-                        }}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition"
+                        onClick={() => setShowForm(true)}
+                        className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition transform hover:scale-105"
                     >
                         + New Task
                     </button>
                 </header>
 
-                {/* MODAL – ONLY SHOW WHEN showForm === true */}
+                {/* CREATE TASK MODAL */}
                 {showForm && (
                     <TaskForm
-                        onClose={() => {
-                            setShowForm(false);
-                        }}
+                        onClose={() => setShowForm(false)}
                         onCreate={() => {
-                            fetchTasks();     // Refresh list
-                            setShowForm(false); // Close modal
+                            setShowForm(false);
+                            refreshTasks();
                         }}
                     />
                 )}
 
                 {/* MAIN CONTENT */}
-                <main className="p-6">
-                    {loading ? (
-                        <div className="text-center py-10">
-                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                            <p className="mt-2">Loading tasks...</p>
+                <main className="p-6 max-w-7xl mx-auto">
+                    {isLoading ? (
+                        <div className="text-center py-20">
+                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600"></div>
+                            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">Loading tasks...</p>
+                        </div>
+                    ) : isError ? (
+                        <div className="text-center py-20">
+                            <p className="text-xl text-red-600 dark:text-red-400">Failed to load tasks. Please try again.</p>
                         </div>
                     ) : tasks.length === 0 ? (
-                        <p className="text-center text-gray-500">No tasks yet. Create one!</p>
+                        <div className="text-center py-20">
+                            <p className="text-xl text-gray-500 dark:text-gray-300">No tasks yet. Create your first one!</p>
+                        </div>
                     ) : (
-                        <Board tasks={tasks} setTasks={setTasks} fetchTasks={fetchTasks} />
+                        <>
+                                        <Board tasks={tasks} />
+
+                            {isFetchingNextPage && (
+                                <div className="text-center py-12">
+                                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                                    <p className="mt-3 text-sm text-gray-500">Loading more tasks...</p>
+                                </div>
+                            )}
+
+                            {!hasNextPage && tasks.length > 10 && (
+                                <div className="text-center py-12">
+                                    <p className="text-sm text-gray-500 italic">
+                                        That's all! You've reached the end.
+                                    </p>
+                                </div>
+                            )}
+                        </>
                     )}
                 </main>
             </div>

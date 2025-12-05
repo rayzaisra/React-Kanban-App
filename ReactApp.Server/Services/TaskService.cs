@@ -1,4 +1,6 @@
-﻿using ReactApp.Server.Dto;
+﻿using Microsoft.EntityFrameworkCore;
+
+using ReactApp.Server.Dto;
 using ReactApp.Server.Entities;
 using ReactApp.Server.Repositories.Intefaces;
 using ReactApp.Server.Services.Interfaces;
@@ -127,6 +129,29 @@ namespace ReactApp.Server.Services
                 Status = task.Status,
                 IsCompleted = task.IsCompleted,
                 CreatedAt = task.CreatedAt
+            };
+        }
+        public async Task<PaginatedTasksResultDto> GetPaginatedWithCountAsync(int page, int pageSize)
+        {
+            var query = _repository.GetQueryable(); // We'll add this in a sec
+            var allData = await query.ToListAsync();
+
+            var totalCount = allData.Count;
+
+            var tasks = allData
+                .OrderBy(x => x.Status)
+                .ThenByDescending(x => x.DueDate)
+                .ThenByDescending(x => x.RequestDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var taskDtos = tasks.Select(MapToDto);
+
+            return new PaginatedTasksResultDto
+            {
+                Tasks = taskDtos,
+                TotalCount = totalCount
             };
         }
     }
