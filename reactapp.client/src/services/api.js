@@ -15,20 +15,35 @@ const reverseStatusMap = {
     'Done': 2
 };
 
+const taskTypeMap = {
+    0: 'Enhance',
+    1: 'BugFixing',
+    2: 'DailyRoutine'
+};
+
+const reverseTaskTypeMap = {
+    'Enhance': 0,
+    'BugFixing': 1,
+    'DailyRoutine': 2
+};
+
+
 const mapTaskFromApi = (task) => ({
     ...task,
     status: statusMap[task.status] ?? 'ToDo',
     isCompleted: task.isCompleted === true,
     requestDate: task.requestDate,
     dueDate: task.dueDate,
+    taskType: taskTypeMap[task.taskType] ?? 'Enhance',
 });
 
 const mapTaskToApi = (task) => ({
     ...task,
-    status: reverseStatusMap[task.status] ?? 0,  // ← CONVERT STRING TO NUMBER
+    status: reverseStatusMap[task.status] ?? 0,
     isCompleted: task.isCompleted === true,
     requestDate: task.requestDate,
     dueDate: task.dueDate,
+    taskType: reverseTaskTypeMap[task.taskType] ?? 0,
 });
 
 export const getAllTasks = async () => {
@@ -77,4 +92,22 @@ export const updateTask = async (id, data) => {
 
 export const deleteTask = async id => {
     await axios.delete(`${API_URL}/${id}`);
+};
+
+export const searchTasks = async ({ searchTerm = '', page = 1, pageSize = 10 }) => {
+    try {
+        const response = await axios.get(`${API_URL}/search`, {
+            params: { searchTerm, page, pageSize }
+        });
+        return {
+            tasks: response.data.tasks.map(mapTaskFromApi),
+            hasMore: response.data.hasMore,
+            currentPage: response.data.currentPage,
+            pageSize: response.data.pageSize,
+            totalCount: response.data.totalCount
+        };
+    } catch (error) {
+        console.error('API Error:', error);
+        throw error;
+    }
 };

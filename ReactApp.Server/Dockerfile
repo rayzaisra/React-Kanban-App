@@ -39,11 +39,11 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 # Railway sets PORT dynamically (e.g., 54321)
-ENV ASPNETCORE_URLS=http://+:${PORT}
+ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Expose that port
-EXPOSE ${PORT}
+EXPOSE 8080
 
 # Launch the app
 ENTRYPOINT ["dotnet", "ReactApp.Server.dll"]

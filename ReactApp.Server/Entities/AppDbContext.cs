@@ -12,12 +12,12 @@ namespace ReactApp.Server.Entities
         {
             modelBuilder.Entity<Task>().Property(t => t.Status).HasConversion<string>();
             modelBuilder.Entity<Task>().ToTable("Tasks");
-            modelBuilder.Entity<Task>().Property(e => e.RequestDate)
-              .HasColumnType("timestamp");  
-            modelBuilder.Entity<Task>().Property(e => e.DueDate)
-             .HasColumnType("timestamp");
-            modelBuilder.Entity<Task>().Property(e => e.CreatedAt)
-            .HasColumnType("timestamp");
+            //modelBuilder.Entity<Task>().Property(e => e.RequestDate)
+            //  .HasColumnType("timestamp");  
+            //modelBuilder.Entity<Task>().Property(e => e.DueDate)
+            // .HasColumnType("timestamp");
+            //modelBuilder.Entity<Task>().Property(e => e.CreatedAt)
+            //.HasColumnType("timestamp");
         }
     }
 }

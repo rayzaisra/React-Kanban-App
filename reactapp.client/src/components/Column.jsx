@@ -1,7 +1,7 @@
 ﻿// src/components/Column.jsx
 import TaskCard from './TaskCard';
 
-const Column = ({ status, tasks }) => {
+const Column = ({ status, tasks, onEdit }) => {
     const title = status === 'ToDo'
         ? 'To Do'
         : status === 'InProgress'
@@ -27,6 +27,7 @@ const Column = ({ status, tasks }) => {
                         <TaskCard
                             key={task.id}
                             task={task}
+                            onEdit={onEdit}
                         />
                     ))
                 )}

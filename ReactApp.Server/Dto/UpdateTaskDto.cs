@@ -7,10 +7,10 @@ namespace ReactApp.Server.Dto
         public string Title { get; set; }
         public string Description { get; set; }
         public string RequestedBy { get; set; }
-        public string? RequestDate { get; set; }   // ← STRING FROM REACT
-        public string? DueDate { get; set; }       // ← STRING FROM REACT
-        // ← ACCEPT STRING FROM REACT
-        public string Status { get; set; }  // "ToDo", "InProgress", "Done"
+        public string RequestDate { get; set; }
+        public string DueDate { get; set; }
+        public string Status { get; set; }
         public bool IsCompleted { get; set; }
+        public string TaskType { get; set; }
     }
 }

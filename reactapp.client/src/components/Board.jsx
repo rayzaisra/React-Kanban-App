@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 const columns = ['ToDo', 'InProgress', 'Done'];
 
-const Board = ({ tasks }) => {
+const Board = ({ tasks, onEdit }) => {
     const queryClient = useQueryClient();
 
     const handleDrop = async (item, newStatus) => {
@@ -53,6 +53,7 @@ const Board = ({ tasks }) => {
                     <Column
                         status={col}
                         tasks={tasks.filter(t => t.status === col)}
+                        onEdit={onEdit}
                     />
                 </DropZone>
             ))}

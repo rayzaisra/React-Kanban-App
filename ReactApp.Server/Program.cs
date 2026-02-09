@@ -29,13 +29,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//    options.UseNpgsql(connectionString, npgsqlOptions =>
+//    {
+//        npgsqlOptions.CommandTimeout(120); // 120 seconds
+//    }));
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString, npgsqlOptions =>
+    options.UseSqlServer(connectionString, sqlOptions =>
     {
-        npgsqlOptions.CommandTimeout(120); // 120 seconds
+        sqlOptions.CommandTimeout(120); // 120 seconds
     }));
 
-AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+//AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
 

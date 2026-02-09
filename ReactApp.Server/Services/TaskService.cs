@@ -34,7 +34,7 @@ namespace ReactApp.Server.Services
             var dueDate = DateTime.Now;
             if (!string.IsNullOrEmpty(dto.RequestDate))
             {
-                requestDate = DateTime.Parse(dto.RequestDate);  // Kind=Unspecified
+                requestDate = DateTime.Parse(dto.RequestDate);
             }
 
             if (!string.IsNullOrEmpty(dto.DueDate))
@@ -42,21 +42,19 @@ namespace ReactApp.Server.Services
                 dueDate = DateTime.Parse(dto.DueDate);
             }
 
-
             var task = new Entities.Task
             {
                 Id = Guid.NewGuid(),
                 Title = dto.Title,
                 Description = dto.Description,
                 RequestedBy = dto.RequestedBy,
-                // Strip Kind for DB compatibility (keeps value as-is)
                 RequestDate = requestDate,
-
                 DueDate = dueDate,
                 Status = Status.ToDo,
                 IsCompleted = false,
-                // Fix for UtcNow: Strip UTC flag (value remains UTC time, but DB sees it as local/unspecified)
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                UpdatedAt = null,
+                TaskType = dto.TaskType ?? "Enhance" // CHANGED: Direct string assignment
             };
 
             await _repository.AddAsync(task);
@@ -71,12 +69,10 @@ namespace ReactApp.Server.Services
             task.Title = dto.Title ?? task.Title;
             task.Description = dto.Description ?? task.Description;
             task.RequestedBy = dto.RequestedBy ?? task.RequestedBy;
-            //task.RequestDate = dto.RequestDate != default ? dto.RequestDate : task.RequestDate;
-            //task.DueDate = dto.DueDate ?? task.DueDate;
-            // PARSE STRING → DateTime (Kind=Unspecified)
+
             if (!string.IsNullOrEmpty(dto.RequestDate))
             {
-                task.RequestDate = DateTime.Parse(dto.RequestDate);  // Kind=Unspecified
+                task.RequestDate = DateTime.Parse(dto.RequestDate);
             }
 
             if (!string.IsNullOrEmpty(dto.DueDate))
@@ -88,8 +84,12 @@ namespace ReactApp.Server.Services
                 task.DueDate = null;
             }
 
-            // Apply logic
-            // ← MAP STRING TO ENUM
+            // CHANGED: Direct string assignment
+            if (!string.IsNullOrEmpty(dto.TaskType))
+            {
+                task.TaskType = dto.TaskType;
+            }
+
             task.Status = dto.Status switch
             {
                 "ToDo" => Status.ToDo,
@@ -98,18 +98,21 @@ namespace ReactApp.Server.Services
                 _ => Status.ToDo
             };
             task.IsCompleted = dto.IsCompleted;
-            // APPLY LOGIC: Only override if needed
+
             if (task.Status == Status.Done && !task.IsCompleted)
             {
                 task.IsCompleted = true;
             }
             else if (task.IsCompleted && task.Status != Status.Done)
             {
-                task.Status = Status.Done;  // Only force Done if IsCompleted = true
+                task.Status = Status.Done;
             }
+
+            task.UpdatedAt = DateTime.Now;
 
             await _repository.UpdateAsync(task);
         }
+
 
         public async System.Threading.Tasks.Task DeleteAsync(Guid id)
         {
@@ -128,12 +131,15 @@ namespace ReactApp.Server.Services
                 DueDate = task.DueDate,
                 Status = task.Status,
                 IsCompleted = task.IsCompleted,
-                CreatedAt = task.CreatedAt
+                CreatedAt = task.CreatedAt,
+                UpdatedAt = task.UpdatedAt,
+                TaskType = task.TaskType ?? "Enhance" // CHANGED: Direct assignment with default
             };
         }
         public async Task<PaginatedTasksResultDto> GetPaginatedWithCountAsync(int page, int pageSize)
         {
             var query = _repository.GetQueryable(); // We'll add this in a sec
+
             var allData = await query.ToListAsync();
 
             var totalCount = allData.Count;
@@ -142,6 +148,39 @@ namespace ReactApp.Server.Services
                 .OrderBy(x => x.Status)
                 .ThenByDescending(x => x.DueDate)
                 .ThenByDescending(x => x.RequestDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var taskDtos = tasks.Select(MapToDto);
+
+            return new PaginatedTasksResultDto
+            {
+                Tasks = taskDtos,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<PaginatedTasksResultDto> SearchTasksAsync(string searchTerm, int page, int pageSize)
+        {
+            var query = _repository.GetQueryable();
+
+            // Filter by title or description if search term is provided
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearchTerm = searchTerm.ToLower();
+                query = query.Where(t =>
+                    t.Title.ToLower().Contains(lowerSearchTerm) ||
+                    (t.Description != null && t.Description.ToLower().Contains(lowerSearchTerm))
+                );
+            }
+
+            var allData = await query.ToListAsync();
+            var totalCount = allData.Count;
+
+            // Order by CreatedAt descending
+            var tasks = allData
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();

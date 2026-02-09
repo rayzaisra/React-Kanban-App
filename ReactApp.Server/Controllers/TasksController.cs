@@ -45,6 +45,28 @@ namespace ReactApp.Server.Controllers
                 TotalCount = result.TotalCount
             });
         }
+        [HttpGet("search")]
+        public async Task<ActionResult<PaginatedTasksResponse>> Search(
+            [FromQuery] string searchTerm = "",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var result = await _service.SearchTasksAsync(searchTerm, page, pageSize);
+
+            var hasMore = (page * pageSize) < result.TotalCount;
+
+            return Ok(new PaginatedTasksResponse
+            {
+                Tasks = result.Tasks,
+                HasMore = hasMore,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalCount = result.TotalCount
+            });
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
