@@ -21,29 +21,32 @@ const Board = ({ tasks, onEdit }) => {
             isCompleted: newStatus === 'Done'
         };
 
-        // 1. Optimistically update UI instantly
-        queryClient.setQueryData(['tasks'], (oldData) => {
-            if (!oldData) return oldData;
+        // 1. Optimistically update ALL query caches immediately
+        const queryCache = queryClient.getQueryCache();
+        const allTaskQueries = queryCache.findAll({ queryKey: ['tasks'] });
 
-            const newPages = oldData.pages.map(page => ({
-                ...page,
-                tasks: page.tasks.map(t =>
-                    t.id === taskId ? updatedTask : t
-                )
-            }));
+        allTaskQueries.forEach(query => {
+            queryClient.setQueryData(query.queryKey, (oldData) => {
+                if (!oldData?.pages) return oldData;
 
-            return { ...oldData, pages: newPages };
+                return {
+                    ...oldData,
+                    pages: oldData.pages.map(page => ({
+                        ...page,
+                        tasks: page.tasks.map(t =>
+                            t.id === taskId ? updatedTask : t
+                        )
+                    }))
+                };
+            });
         });
 
-        // 2. Update backend (fire and forget)
-        try {
-            await updateTask(taskId, updatedTask);
-            // Success → already updated optimistically
-        } catch (error) {
+        // 2. Update backend silently in the background
+        updateTask(taskId, updatedTask).catch(error => {
             console.error('Failed to update task:', error);
-            // Revert on error
+            // Only refetch on error to revert
             queryClient.invalidateQueries({ queryKey: ['tasks'] });
-        }
+        });
     };
 
     return (
@@ -61,7 +64,6 @@ const Board = ({ tasks, onEdit }) => {
     );
 };
 
-// DropZone stays the same
 const DropZone = ({ status, onDrop, children }) => {
     const [{ isOver }, drop] = useDrop(() => ({
         accept: 'task',

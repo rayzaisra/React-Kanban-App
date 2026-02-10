@@ -12,10 +12,16 @@ namespace ReactApp.Server.Controllers
     public class TasksController : ControllerBase
     {
         private readonly ITaskService _service;
+        private readonly IBoardService _boardService;
+        private readonly IUserPreferencesService _preferencesService;
 
-        public TasksController(ITaskService service)
+        public TasksController(ITaskService service,
+            IBoardService boardService,
+            IUserPreferencesService preferencesService)
         {
             _service = service;
+            _boardService = boardService;
+            _preferencesService = preferencesService;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -26,13 +32,15 @@ namespace ReactApp.Server.Controllers
 
         [HttpGet("paginated")]
         public async Task<ActionResult<PaginatedTasksResponse>> GetPaginated(
-     [FromQuery] int page = 1,
-     [FromQuery] int pageSize = 10)
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string sortBy = "createdAt",
+            [FromQuery] string sortOrder = "desc")
         {
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 100);
 
-            var result = await _service.GetPaginatedWithCountAsync(page, pageSize);
+            var result = await _service.GetPaginatedWithCountAsync(page, pageSize, sortBy, sortOrder);
 
             var hasMore = (page * pageSize) < result.TotalCount;
 
@@ -45,16 +53,22 @@ namespace ReactApp.Server.Controllers
                 TotalCount = result.TotalCount
             });
         }
+
         [HttpGet("search")]
         public async Task<ActionResult<PaginatedTasksResponse>> Search(
             [FromQuery] string searchTerm = "",
             [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string taskType = "",
+            [FromQuery] string status = "",
+            [FromQuery] int? priority = null,
+            [FromQuery] bool? overdue = null)
         {
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 100);
 
-            var result = await _service.SearchTasksAsync(searchTerm, page, pageSize);
+            var result = await _service.SearchTasksAsync(
+                searchTerm, page, pageSize, taskType, status, priority, overdue);
 
             var hasMore = (page * pageSize) < result.TotalCount;
 
@@ -103,6 +117,28 @@ namespace ReactApp.Server.Controllers
         {
             await _service.DeleteAsync(id);
             return NoContent();
+        }
+
+        // Analytics endpoints
+        [HttpGet("analytics/summary")]
+        public async Task<IActionResult> GetAnalyticsSummary()
+        {
+            var summary = await _service.GetAnalyticsSummaryAsync();
+            return Ok(summary);
+        }
+
+        [HttpGet("analytics/by-type")]
+        public async Task<IActionResult> GetTasksByType()
+        {
+            var data = await _service.GetTasksByTypeAsync();
+            return Ok(data);
+        }
+
+        [HttpGet("analytics/by-priority")]
+        public async Task<IActionResult> GetTasksByPriority()
+        {
+            var data = await _service.GetTasksByPriorityAsync();
+            return Ok(data);
         }
     }
 }

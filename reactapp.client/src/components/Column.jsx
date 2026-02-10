@@ -1,5 +1,4 @@
-﻿// src/components/Column.jsx
-import TaskCard from './TaskCard';
+﻿import TaskCard from './TaskCard';
 
 const Column = ({ status, tasks, onEdit }) => {
     const title = status === 'ToDo'

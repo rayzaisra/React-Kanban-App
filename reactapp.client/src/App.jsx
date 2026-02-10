@@ -1,18 +1,52 @@
-﻿// src/App.jsx
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import TaskForm from './components/TaskForm';
 import Board from './components/Board';
+import ListView from './components/ListView';
+import ViewSwitcher from './components/ViewSwitcher';
+import FilterSidebar from './components/FilterSidebar';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { getTasksPaginated, searchTasks } from './services/api';
+import { getTasksPaginated, searchTasks, deleteTask, getUserPreferences, updateUserPreferences } from './services/api';
 
 function App() {
     const queryClient = useQueryClient();
     const [showForm, setShowForm] = useState(false);
     const [taskToEdit, setTaskToEdit] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isSearching, setIsSearching] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [filters, setFilters] = useState({
+        taskType: '',
+        status: '',
+        priority: '',
+        overdue: false
+    });
+
+    // User preferences
+    const userId = 'default-user'; // Replace with actual user ID from auth
+    const [currentView, setCurrentView] = useState('kanban');
+
+    // Load user preferences
+    useEffect(() => {
+        getUserPreferences(userId).then(prefs => {
+            if (prefs.preferredView) {
+                setCurrentView(prefs.preferredView);
+            }
+        });
+    }, [userId]);
+
+    // Save view preference
+    const handleViewChange = async (view) => {
+        setCurrentView(view);
+        try {
+            await updateUserPreferences(userId, {
+                preferredView: view,
+                boardSettings: {}
+            });
+        } catch (error) {
+            console.error('Failed to save preference:', error);
+        }
+    };
 
     const {
         data,
@@ -22,10 +56,15 @@ function App() {
         isLoading,
         isError,
     } = useInfiniteQuery({
-        queryKey: ['tasks', searchTerm],
+        queryKey: ['tasks', searchTerm, filters],
         queryFn: ({ pageParam = 1 }) => {
-            if (searchTerm.trim()) {
-                return searchTasks({ searchTerm, page: pageParam, pageSize: 10 });
+            if (searchTerm.trim() || filters.taskType || filters.status || filters.priority || filters.overdue) {
+                return searchTasks({
+                    searchTerm,
+                    page: pageParam,
+                    pageSize: 10,
+                    ...filters
+                });
             }
             return getTasksPaginated({ page: pageParam, pageSize: 10 });
         },
@@ -36,13 +75,13 @@ function App() {
             tasks: data.pages.flatMap(page => page.tasks || []),
             hasMore: data.pages[data.pages.length - 1]?.hasMore ?? false
         }),
-        staleTime: 30_000,
+        staleTime: 0,
         gcTime: 5 * 60_000,
+        refetchOnWindowFocus: false,
     });
 
     const tasks = data?.tasks || [];
 
-    // Infinite scroll
     useEffect(() => {
         const onScroll = () => {
             if (
@@ -68,6 +107,16 @@ function App() {
         setShowForm(true);
     };
 
+    const handleDeleteTask = async (taskId) => {
+        try {
+            await deleteTask(taskId);
+            refreshTasks();
+        } catch (error) {
+            console.error('Delete failed:', error);
+            alert('Failed to delete task');
+        }
+    };
+
     const handleCloseForm = () => {
         setShowForm(false);
         setTaskToEdit(null);
@@ -87,54 +136,94 @@ function App() {
         setSearchTerm('');
     };
 
+    const handleFilterChange = (newFilters) => {
+        setFilters(newFilters);
+    };
+
+    // Count active filters
+    const activeFiltersCount = [
+        filters.taskType,
+        filters.status,
+        filters.priority,
+        filters.overdue
+    ].filter(Boolean).length;
+
     return (
         <DndProvider backend={HTML5Backend}>
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
                 {/* HEADER */}
-                <header className="border-b border-gray-200 dark:border-gray-700 p-4 sticky top-0 bg-inherit backdrop-blur-sm z-50">
-                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-                        <h1 className="text-2xl font-bold">Kanban Board</h1>
+                <header className="border-b border-gray-200 dark:border-gray-700 p-4 sticky top-0 bg-white dark:bg-gray-800 backdrop-blur-sm z-50 shadow-sm">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                            <h1 className="text-2xl font-bold">Kanban Board</h1>
 
-                        {/* SEARCH BOX */}
-                        <div className="flex-1 max-w-md w-full">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Search tasks by title or description..."
-                                    value={searchTerm}
-                                    onChange={handleSearchChange}
-                                    className="w-full px-4 py-2 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg
-                                             bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                                             focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                                             transition-all"
-                                />
+                            {/* SEARCH BOX */}
+                            <div className="flex-1 max-w-md w-full">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Search tasks..."
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                        className="w-full px-4 py-2 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg
+                                                 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                                                 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    />
+                                    {searchTerm && (
+                                        <button
+                                            onClick={handleClearSearch}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1
+                                                     text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400
+                                                     dark:hover:text-gray-200 transition"
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
                                 {searchTerm && (
-                                    <button
-                                        onClick={handleClearSearch}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1
-                                                 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400
-                                                 dark:hover:text-gray-200 transition"
-                                    >
-                                        Clear
-                                    </button>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        {tasks.length} result{tasks.length !== 1 ? 's' : ''} found
+                                    </p>
                                 )}
                             </div>
-                            {searchTerm && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {tasks.length} result{tasks.length !== 1 ? 's' : ''} found
-                                </p>
-                            )}
+
+                            <button
+                                onClick={() => setShowForm(true)}
+                                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium
+                                         rounded-lg shadow-md transition transform hover:scale-105 whitespace-nowrap"
+                            >
+                                + New Task
+                            </button>
                         </div>
 
-                        <button
-                            onClick={() => setShowForm(true)}
-                            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium
-                                     rounded-lg shadow-md transition transform hover:scale-105 whitespace-nowrap"
-                        >
-                            + New Task
-                        </button>
+                        {/* VIEW SWITCHER & FILTER BUTTON */}
+                        <div className="flex justify-between items-center">
+                            <ViewSwitcher currentView={currentView} onViewChange={handleViewChange} />
+
+                            <button
+                                onClick={() => setShowFilters(true)}
+                                className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 
+                                         rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            >
+                                <span>🔍</span>
+                                <span>Filters</span>
+                                {activeFiltersCount > 0 && (
+                                    <span className="bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full">
+                                        {activeFiltersCount}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </header>
+
+                {/* FILTER SIDEBAR */}
+                {showFilters && (
+                    <FilterSidebar
+                        onFilterChange={handleFilterChange}
+                        onClose={() => setShowFilters(false)}
+                    />
+                )}
 
                 {/* CREATE/EDIT TASK MODAL */}
                 {showForm && (
@@ -159,12 +248,24 @@ function App() {
                     ) : tasks.length === 0 ? (
                         <div className="text-center py-20">
                             <p className="text-xl text-gray-500 dark:text-gray-300">
-                                {searchTerm ? 'No tasks found matching your search.' : 'No tasks yet. Create your first one!'}
+                                {searchTerm || activeFiltersCount > 0
+                                    ? 'No tasks found matching your criteria.'
+                                    : 'No tasks yet. Create your first one!'}
                             </p>
                         </div>
                     ) : (
                         <>
-                            <Board tasks={tasks} onEdit={handleEditTask} />
+                            {/* RENDER BASED ON VIEW */}
+                            {currentView === 'kanban' && (
+                                <Board tasks={tasks} onEdit={handleEditTask} />
+                            )}
+                            {currentView === 'list' && (
+                                <ListView
+                                    tasks={tasks}
+                                    onEdit={handleEditTask}
+                                    onDelete={handleDeleteTask}
+                                />
+                            )}
 
                             {isFetchingNextPage && (
                                 <div className="text-center py-12">

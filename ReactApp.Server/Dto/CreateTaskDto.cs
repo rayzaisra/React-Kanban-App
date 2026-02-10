@@ -1,4 +1,6 @@
-﻿namespace ReactApp.Server.Dto
+﻿using ReactApp.Server.Entities;
+
+namespace ReactApp.Server.Dto
 {
     public class CreateTaskDto
     {
@@ -8,7 +10,8 @@
         public string RequestDate { get; set; }
         public string DueDate { get; set; }
         public string Status { get; set; }
-        public bool IsCompleted { get; set; }
+        public bool? IsCompleted { get; set; }
         public string TaskType { get; set; }
+        public int? Priority { get; set; } // 0=Low, 1=Medium, 2=High, 3=Critical
     }
 }

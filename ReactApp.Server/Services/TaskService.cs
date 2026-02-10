@@ -32,6 +32,7 @@ namespace ReactApp.Server.Services
         {
             var requestDate = DateTime.Now;
             var dueDate = DateTime.Now;
+
             if (!string.IsNullOrEmpty(dto.RequestDate))
             {
                 requestDate = DateTime.Parse(dto.RequestDate);
@@ -41,6 +42,11 @@ namespace ReactApp.Server.Services
             {
                 dueDate = DateTime.Parse(dto.DueDate);
             }
+
+            var validTaskTypes = new[] { "Enhance", "BugFixing", "DailyRoutine" };
+            var taskType = validTaskTypes.Contains(dto.TaskType) ? dto.TaskType : "Enhance";
+
+            var priority = (Priority)Math.Clamp(dto.Priority.Value, 0, 3);
 
             var task = new Entities.Task
             {
@@ -54,7 +60,8 @@ namespace ReactApp.Server.Services
                 IsCompleted = false,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = null,
-                TaskType = dto.TaskType ?? "Enhance" // CHANGED: Direct string assignment
+                TaskType = taskType,
+                Priority = priority
             };
 
             await _repository.AddAsync(task);
@@ -84,11 +91,17 @@ namespace ReactApp.Server.Services
                 task.DueDate = null;
             }
 
-            // CHANGED: Direct string assignment
             if (!string.IsNullOrEmpty(dto.TaskType))
             {
-                task.TaskType = dto.TaskType;
+                var validTaskTypes = new[] { "Enhance", "BugFixing", "DailyRoutine" };
+                if (validTaskTypes.Contains(dto.TaskType))
+                {
+                    task.TaskType = dto.TaskType;
+                }
             }
+
+            // Update Priority
+            task.Priority = (Priority)Math.Clamp(dto.Priority, 0, 3);
 
             task.Status = dto.Status switch
             {
@@ -113,7 +126,6 @@ namespace ReactApp.Server.Services
             await _repository.UpdateAsync(task);
         }
 
-
         public async System.Threading.Tasks.Task DeleteAsync(Guid id)
         {
             await _repository.DeleteAsync(id);
@@ -129,30 +141,72 @@ namespace ReactApp.Server.Services
                 RequestedBy = task.RequestedBy,
                 RequestDate = task.RequestDate,
                 DueDate = task.DueDate,
-                Status = task.Status,
+                Status = (int)task.Status,
                 IsCompleted = task.IsCompleted,
                 CreatedAt = task.CreatedAt,
                 UpdatedAt = task.UpdatedAt,
-                TaskType = task.TaskType ?? "Enhance" // CHANGED: Direct assignment with default
+                TaskType = task.TaskType ?? "Enhance",
+                Priority = (int)task.Priority
             };
         }
-        public async Task<PaginatedTasksResultDto> GetPaginatedWithCountAsync(int page, int pageSize)
+
+        public async Task<PaginatedTasksResultDto> GetPaginatedWithCountAsync(
+    int page,
+    int pageSize,
+    string sortBy = "createdAt",
+    string sortOrder = "desc")
         {
-            var query = _repository.GetQueryable(); // We'll add this in a sec
+            var baseQuery = _repository.GetQueryable();
 
-            var allData = await query.ToListAsync();
+            // Total count of ALL tasks (not per page)
+            var totalCount = await baseQuery.CountAsync();
 
-            var totalCount = allData.Count;
+            // Build ordered query function
+            IQueryable<Entities.Task> ApplySorting(IQueryable<Entities.Task> q) =>
+                sortBy.ToLower() switch
+                {
+                    "priority" => sortOrder == "asc"
+                        ? q.OrderBy(x => x.Priority)
+                        : q.OrderByDescending(x => x.Priority),
 
-            var tasks = allData
-                .OrderBy(x => x.Status)
-                .ThenByDescending(x => x.DueDate)
-                .ThenByDescending(x => x.RequestDate)
-                .Skip((page - 1) * pageSize)
+                    "duedate" => sortOrder == "asc"
+                        ? q.OrderBy(x => x.DueDate ?? DateTime.MaxValue)
+                        : q.OrderByDescending(x => x.DueDate ?? DateTime.MinValue),
+
+                    "title" => sortOrder == "asc"
+                        ? q.OrderBy(x => x.Title)
+                        : q.OrderByDescending(x => x.Title),
+
+                    _ => sortOrder == "asc"
+                        ? q.OrderBy(x => x.CreatedAt)
+                        : q.OrderByDescending(x => x.CreatedAt)
+                };
+
+            var skip = (page - 1) * pageSize;
+
+            // Query per status
+            var doneTasks = await ApplySorting(baseQuery.Where(x => x.Status == Status.Done))
+                .Skip(skip)
                 .Take(pageSize)
+                .ToListAsync();
+
+            var inProgressTasks = await ApplySorting(baseQuery.Where(x => x.Status == Status.InProgress))
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var todoTasks = await ApplySorting(baseQuery.Where(x => x.Status == Status.ToDo))
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Merge all groups
+            var combined = doneTasks
+                .Concat(inProgressTasks)
+                .Concat(todoTasks)
                 .ToList();
 
-            var taskDtos = tasks.Select(MapToDto);
+            var taskDtos = combined.Select(MapToDto);
 
             return new PaginatedTasksResultDto
             {
@@ -161,11 +215,18 @@ namespace ReactApp.Server.Services
             };
         }
 
-        public async Task<PaginatedTasksResultDto> SearchTasksAsync(string searchTerm, int page, int pageSize)
+        public async Task<PaginatedTasksResultDto> SearchTasksAsync(
+            string searchTerm,
+            int page,
+            int pageSize,
+            string taskType = "",
+            string status = "",
+            int? priority = null,
+            bool? overdue = null)
         {
             var query = _repository.GetQueryable();
 
-            // Filter by title or description if search term is provided
+            // Search filter
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var lowerSearchTerm = searchTerm.ToLower();
@@ -175,10 +236,42 @@ namespace ReactApp.Server.Services
                 );
             }
 
+            // TaskType filter
+            if (!string.IsNullOrWhiteSpace(taskType))
+            {
+                query = query.Where(t => t.TaskType == taskType);
+            }
+
+            // Status filter
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                var statusEnum = status switch
+                {
+                    "ToDo" => Status.ToDo,
+                    "InProgress" => Status.InProgress,
+                    "Done" => Status.Done,
+                    _ => Status.ToDo
+                };
+                query = query.Where(t => t.Status == statusEnum);
+            }
+
+            // Priority filter
+            if (priority.HasValue)
+            {
+                var priorityEnum = (Priority)Math.Clamp(priority.Value, 0, 3);
+                query = query.Where(t => t.Priority == priorityEnum);
+            }
+
+            // Overdue filter
+            if (overdue.HasValue && overdue.Value)
+            {
+                var now = DateTime.Now;
+                query = query.Where(t => t.DueDate.HasValue && t.DueDate.Value < now && !t.IsCompleted);
+            }
+
             var allData = await query.ToListAsync();
             var totalCount = allData.Count;
 
-            // Order by CreatedAt descending
             var tasks = allData
                 .OrderByDescending(x => x.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -191,6 +284,52 @@ namespace ReactApp.Server.Services
             {
                 Tasks = taskDtos,
                 TotalCount = totalCount
+            };
+        }
+
+        // Analytics methods
+        public async Task<object> GetAnalyticsSummaryAsync()
+        {
+            var tasks = await _repository.GetAllAsync();
+            var now = DateTime.Now;
+
+            return new
+            {
+                totalTasks = tasks.Count(),
+                completedTasks = tasks.Count(t => t.IsCompleted),
+                overdueTasks = tasks.Count(t => t.DueDate.HasValue && t.DueDate.Value < now && !t.IsCompleted),
+                highPriorityTasks = tasks.Count(t => t.Priority == Priority.High || t.Priority == Priority.Critical),
+                tasksByStatus = new
+                {
+                    toDo = tasks.Count(t => t.Status == Status.ToDo),
+                    inProgress = tasks.Count(t => t.Status == Status.InProgress),
+                    done = tasks.Count(t => t.Status == Status.Done)
+                }
+            };
+        }
+
+        public async Task<object> GetTasksByTypeAsync()
+        {
+            var tasks = await _repository.GetAllAsync();
+
+            return new
+            {
+                enhance = tasks.Count(t => t.TaskType == "Enhance"),
+                bugFixing = tasks.Count(t => t.TaskType == "BugFixing"),
+                dailyRoutine = tasks.Count(t => t.TaskType == "DailyRoutine")
+            };
+        }
+
+        public async Task<object> GetTasksByPriorityAsync()
+        {
+            var tasks = await _repository.GetAllAsync();
+
+            return new
+            {
+                low = tasks.Count(t => t.Priority == Priority.Low),
+                medium = tasks.Count(t => t.Priority == Priority.Medium),
+                high = tasks.Count(t => t.Priority == Priority.High),
+                critical = tasks.Count(t => t.Priority == Priority.Critical)
             };
         }
     }

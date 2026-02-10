@@ -18,5 +18,6 @@ namespace ReactApp.Server.Entities
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string TaskType { get; set; }
+        public Priority Priority { get; set; }
     }
 }

@@ -12,5 +12,6 @@ namespace ReactApp.Server.Dto
         public string Status { get; set; }
         public bool IsCompleted { get; set; }
         public string TaskType { get; set; }
+        public int Priority { get; set; }
     }
 }

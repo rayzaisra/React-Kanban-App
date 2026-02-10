@@ -1,6 +1,7 @@
 ﻿import { useDrag } from 'react-dnd';
 import { deleteTask } from '../services/api';
 import { useQueryClient } from '@tanstack/react-query';
+import PriorityBadge from './PriorityBadge';
 
 const TaskCard = ({ task, onEdit }) => {
     const queryClient = useQueryClient();
@@ -17,10 +18,10 @@ const TaskCard = ({ task, onEdit }) => {
 
         try {
             await deleteTask(task.id);
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
         } catch (error) {
             alert('Failed to delete task');
             console.error(error);
-            queryClient.invalidateQueries({ queryKey: ['tasks'] });
         }
     };
 
@@ -36,12 +37,11 @@ const TaskCard = ({ task, onEdit }) => {
         });
     };
 
-    // Task Type badge styling
     const getTaskTypeBadge = () => {
         const badges = {
-            'Enhance': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-            'BugFixing': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-            'DailyRoutine': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+            'Enhance': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
+            'BugFixing': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border border-red-200 dark:border-red-800',
+            'DailyRoutine': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
         };
         return badges[task.taskType] || badges['Enhance'];
     };
@@ -55,7 +55,6 @@ const TaskCard = ({ task, onEdit }) => {
         return labels[task.taskType] || '🚀 Enhance';
     };
 
-    // Background & border colors
     const getCardColor = () => {
         if (task.status === 'Done')
             return 'bg-green-50 border-green-300 dark:bg-green-900/20 dark:border-green-700';
@@ -78,11 +77,12 @@ const TaskCard = ({ task, onEdit }) => {
                 transition-all cursor-grab active:cursor-grabbing select-none
                 shadow-sm hover:shadow-lg transform hover:-translate-y-0.5`}
         >
-            {/* Task Type Badge */}
-            <div className="mb-2">
+            {/* Badges Row */}
+            <div className="flex gap-2 mb-3 flex-wrap">
                 <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeBadge()}`}>
                     {getTaskTypeLabel()}
                 </span>
+                <PriorityBadge priority={task.priority} />
             </div>
 
             <h3 className={`font-semibold text-lg ${getTitleColor()} ${task.isCompleted ? 'line-through' : ''}`}>
@@ -90,7 +90,7 @@ const TaskCard = ({ task, onEdit }) => {
             </h3>
 
             {task.description && (
-                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1 line-clamp-3">
+                <p className="text-sm text-gray-700 dark:text-gray-300 mt-2 line-clamp-3">
                     {task.description}
                 </p>
             )}

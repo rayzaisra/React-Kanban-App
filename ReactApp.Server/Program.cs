@@ -36,6 +36,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IBoardService, BoardService>();
+builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 
 var app = builder.Build();
 

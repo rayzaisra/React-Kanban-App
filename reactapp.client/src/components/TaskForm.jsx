@@ -1,5 +1,4 @@
-﻿// src/components/TaskForm.jsx
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { createTask, updateTask } from '../services/api';
 
 const TaskForm = ({ onClose, onCreate, taskToEdit = null }) => {
@@ -14,10 +13,10 @@ const TaskForm = ({ onClose, onCreate, taskToEdit = null }) => {
         dueDate: '',
         dueTime: '',
         status: 'ToDo',
-        taskType: 'Enhance'
+        taskType: 'Enhance',
+        priority: 'Medium'
     });
 
-    // Populate form if editing
     useEffect(() => {
         if (taskToEdit) {
             const requestDateTime = taskToEdit.requestDate ? new Date(taskToEdit.requestDate) : null;
@@ -32,7 +31,8 @@ const TaskForm = ({ onClose, onCreate, taskToEdit = null }) => {
                 dueDate: dueDateTime ? dueDateTime.toISOString().split('T')[0] : '',
                 dueTime: dueDateTime ? dueDateTime.toISOString().split('T')[1].substring(0, 5) : '',
                 status: taskToEdit.status || 'ToDo',
-                taskType: taskToEdit.taskType || 'Enhance'
+                taskType: taskToEdit.taskType || 'Enhance',
+                priority: taskToEdit.priority || 'Medium'
             });
         }
     }, [taskToEdit]);
@@ -49,7 +49,6 @@ const TaskForm = ({ onClose, onCreate, taskToEdit = null }) => {
             return;
         }
 
-        // COMBINE DATE + TIME → ISO STRING
         const requestDateTime = `${form.requestDate}T${form.requestTime}:00.000Z`;
         const dueDateTime = form.dueDate && form.dueTime
             ? `${form.dueDate}T${form.dueTime}:00.000Z`
@@ -63,7 +62,8 @@ const TaskForm = ({ onClose, onCreate, taskToEdit = null }) => {
             dueDate: dueDateTime,
             status: form.status,
             isCompleted: form.status === 'Done',
-            taskType: form.taskType
+            taskType: form.taskType,
+            priority: form.priority
         };
 
         try {
@@ -133,9 +133,26 @@ const TaskForm = ({ onClose, onCreate, taskToEdit = null }) => {
                             onChange={handleChange}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
                         >
-                            <option value="Enhance">Enhance - New feature/request to develop</option>
-                            <option value="BugFixing">Bug Fixing - Fix reported bugs</option>
-                            <option value="DailyRoutine">Daily Routine - Maintenance, reports, updates</option>
+                            <option value="Enhance">🚀 Enhance - New feature/request to develop</option>
+                            <option value="BugFixing">🐛 Bug Fixing - Fix reported bugs</option>
+                            <option value="DailyRoutine">📅 Daily Routine - Maintenance, reports, updates</option>
+                        </select>
+                    </div>
+
+                    {/* PRIORITY */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Priority *</label>
+                        <select
+                            name="priority"
+                            required
+                            value={form.priority}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700"
+                        >
+                            <option value="Low">📌 Low</option>
+                            <option value="Medium">⭐ Medium</option>
+                            <option value="High">⚡ High</option>
+                            <option value="Critical">🔥 Critical</option>
                         </select>
                     </div>
 

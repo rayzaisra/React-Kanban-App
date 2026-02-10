@@ -10,10 +10,11 @@ namespace ReactApp.Server.Dto
         public string RequestedBy { get; set; }
         public DateTime RequestDate { get; set; }
         public DateTime? DueDate { get; set; }
-        public Status Status { get; set; }
+        public int Status { get; set; }
         public bool IsCompleted { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string TaskType { get; set; }
+        public int Priority { get; set; }
     }
 }
