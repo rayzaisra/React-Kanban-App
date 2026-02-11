@@ -4,6 +4,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import TaskForm from './components/TaskForm';
 import Board from './components/Board';
 import ListView from './components/ListView';
+import TableView from './components/TableView';  // ← ADD THIS IMPORT
 import ViewSwitcher from './components/ViewSwitcher';
 import FilterSidebar from './components/FilterSidebar';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,7 +24,7 @@ function App() {
     });
 
     // User preferences
-    const userId = 'default-user'; // Replace with actual user ID from auth
+    const userId = 'default-user';
     const [currentView, setCurrentView] = useState('kanban');
 
     // Load user preferences
@@ -140,7 +141,6 @@ function App() {
         setFilters(newFilters);
     };
 
-    // Count active filters
     const activeFiltersCount = [
         filters.taskType,
         filters.status,
@@ -261,6 +261,13 @@ function App() {
                             )}
                             {currentView === 'list' && (
                                 <ListView
+                                    tasks={tasks}
+                                    onEdit={handleEditTask}
+                                    onDelete={handleDeleteTask}
+                                />
+                            )}
+                            {currentView === 'table' && (
+                                <TableView
                                     tasks={tasks}
                                     onEdit={handleEditTask}
                                     onDelete={handleDeleteTask}
